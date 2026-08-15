@@ -1,3 +1,4 @@
+
 name: Build IPA for TrollStore
 
 on:
@@ -13,90 +14,72 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup Fresh Swift Project
+    - name: Install XcodeGen
+      run: brew install xcodegen
+
+    - name: Clean & Setup Simple Project
       run: |
-        # Xóa sạch các thư mục cũ tránh xung đột
-        rm -rf Sources ThangLoApp project.yml Package.swift
+        rm -rf *.xcodeproj project.yml Sources ThangLoApp
+        mkdir -p ThangLoApp
         
-        # Tạo cấu trúc code SwiftUI mới tinh
-        mkdir -p Sources/ThangLoApp
-        cat << 'EOF' > Sources/ThangLoApp/main.swift
+        cat << 'EOF' > ThangLoApp/ContentView.swift
         import SwiftUI
 
         @main
         struct ThangLoApp: App {
             var body: some Scene {
                 WindowGroup {
-                    Text("Hello TrollStore!")
-                        .font(.largeTitle)
+                    Text("App Da Build Thanh Cong!")
+                        .font(.title)
                         .padding()
                 }
             }
         }
         EOF
 
-        # Tạo file cấu hình SPM Package.swift
-        cat << 'EOF' > Package.swift
-        // swift-tools-version:5.5
-        import PackageDescription
-
-        let package = Package(
-            name: "ThangLoApp",
-            platforms: [.iOS(.v15)],
-            products: [
-                .executable(name: "ThangLoApp", targets: ["ThangLoApp"])
-            ],
-            targets: [
-                .executableTarget(
-                    name: "ThangLoApp",
-                    path: "Sources/ThangLoApp"
-                )
-            ]
-        )
+        cat << 'EOF' > project.yml
+        name: ThangLoApp
+        options:
+          bundleIdPrefix: com.thanglo
+          deploymentTarget:
+            iOS: "15.0"
+        targets:
+          ThangLoApp:
+            type: application
+            platform: iOS
+            sources:
+              - ThangLoApp
+            settings:
+              base:
+                PRODUCT_BUNDLE_IDENTIFIER: com.thanglo.ThangLoApp
+                GENERATE_INFOPLIST_FILE: YES
+                INFOPLIST_KEY_UILaunchScreen_Generation: YES
+                CODE_SIGNING_ALLOWED: NO
+                CODE_SIGNING_REQUIRED: NO
+                CODE_SIGN_IDENTITY: ""
         EOF
+        
+        xcodegen generate
 
-    - name: Build Executable
+    - name: Build App Executable
       run: |
-        SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-        swift build -c release --sdk $SDK_PATH -Xswiftc -target -Xswiftc arm64-apple-ios15.0
+        xcodebuild build \
+          -project ThangLoApp.xcodeproj \
+          -scheme ThangLoApp \
+          -sdk iphoneos \
+          -configuration Release \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGN_ENTITLEMENTS="" \
+          CODE_SIGNING_INJECT_BASE_ENTITLEMENTS=NO \
+          CONFIGURATION_BUILD_DIR=build
 
     - name: Package IPA
       run: |
-        mkdir -p build/Payload/ThangLoApp.app
-        
-        # Coppy file thực thi sau khi build xong
-        cp .build/arm64-apple-ios/release/ThangLoApp build/Payload/ThangLoApp.app/
-        
-        # Tạo Info.plist chuẩn
-        cat << 'EOF' > build/Payload/ThangLoApp.app/Info.plist
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>CFBundleExecutable</key>
-            <string>ThangLoApp</string>
-            <key>CFBundleIdentifier</key>
-            <string>com.thanglo.ThangLoApp</string>
-            <key>CFBundleName</key>
-            <string>ThangLoApp</string>
-            <key>CFBundleShortVersionString</key>
-            <string>1.0</string>
-            <key>CFBundleVersion</key>
-            <string>1</string>
-            <key>MinimumOSVersion</key>
-            <string>15.0</string>
-            <key>UIApplicationSceneManifest</key>
-            <dict>
-                <key>UIApplicationSupportsMultipleScenes</key>
-                <true/>
-            </dict>
-        </dict>
-        </plist>
-        EOF
-
-        # Ký giả Ad-Hoc & Nén IPA
-        codesign --force --deep --sign - build/Payload/ThangLoApp.app
         cd build
+        mkdir Payload
+        cp -r ThangLoApp.app Payload/
         zip -r ThangLoApp.ipa Payload
 
     - name: Upload IPA Artifact
