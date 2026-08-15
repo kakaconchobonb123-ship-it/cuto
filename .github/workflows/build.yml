@@ -13,18 +13,36 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Prepare Sources and Compile
+    - name: Prepare Source Code
+      run: |
+        mkdir -p src_temp
+        
+        # Gom các file swift hiện có
+        find . -maxdepth 3 -name "*.swift" -exec cp {} src_temp/ \; || true
+        
+        # Nếu chưa có code, tự tạo file SwiftUI chuẩn đéc
+        if [ ! -f src_temp/App.swift ]; then
+          cat << 'EOF' > src_temp/App.swift
+          import SwiftUI
+
+          @main
+          struct ThangLoApp: App {
+              var body: some Scene {
+                  WindowGroup {
+                      Text("Hello TrollStore!")
+                          .font(.largeTitle)
+                  }
+              }
+          }
+          EOF
+        fi
+
+    - name: Compile & Package IPA
       run: |
         SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-        
-        # 1. Tạo thư mục tạm và gom tất cả file .swift vào 1 chỗ
-        mkdir -p src_temp
-        find . -maxdepth 3 -name "*.swift" -exec cp {} src_temp/ \;
-        
-        # 2. Tạo cấu trúc thư mục .app
         mkdir -p build/Payload/ThangLoApp.app
         
-        # 3. Biên dịch trực tiếp toàn bộ các file swift trong src_temp
+        # Biên dịch Swift ra file thực thi cho iOS ARM64
         swiftc -sdk $SDK_PATH \
                -target arm64-apple-ios15.0 \
                -parse-as-library \
@@ -35,9 +53,7 @@ jobs:
                -o build/Payload/ThangLoApp.app/ThangLoApp \
                src_temp/*.swift
 
-    - name: Create Info.plist & Package IPA
-      run: |
-        # Tạo Info.plist chuẩn iOS
+        # Tạo Info.plist
         cat << 'EOF' > build/Payload/ThangLoApp.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -64,14 +80,13 @@ jobs:
         </plist>
         EOF
 
-        # Ký Ad-Hoc và nén IPA
+        # Ký giả Ad-Hoc & Nén IPA
         codesign --force --deep --sign - build/Payload/ThangLoApp.app
         cd build
         zip -r ThangLoApp.ipa Payload
 
-    - name: Upload Universal IPA
+    - name: Upload IPA Artifact
       uses: actions/upload-artifact@v4
       with:
         name: ThangLoApp-TrollStore
         path: build/ThangLoApp.ipa
-
