@@ -16,6 +16,9 @@ jobs:
     - name: Install XcodeGen
       run: brew install xcodegen
 
+    - name: Remove old project files
+      run: rm -rf ThangLoApp.xcodeproj
+
     - name: Create project.yml for XcodeGen
       run: |
         cat << 'EOF' > project.yml
@@ -32,8 +35,6 @@ jobs:
               - path: ThangLoApp
             settings:
               base:
-                GENERATE_INFOPLIST_FILE: YES
-                INFOPLIST_FILE: ThangLoApp/Info.plist
                 PRODUCT_BUNDLE_IDENTIFIER: com.example.ThangLoApp
                 CODE_SIGNING_ALLOWED: NO
                 CODE_SIGNING_REQUIRED: NO
