@@ -22,8 +22,7 @@ jobs:
       run: |
         xcodebuild build \
           -project ThangLoApp.xcodeproj \
-          -scheme ThangLoApp \
-          -autocreateSchemes \
+          -alltargets \
           -sdk iphoneos \
           -configuration Release \
           CODE_SIGN_IDENTITY="" \
