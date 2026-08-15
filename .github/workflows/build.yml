@@ -16,10 +16,53 @@ jobs:
     - name: Install XcodeGen
       run: brew install xcodegen
 
-    - name: Setup Project Structure
+    - name: Setup App Code and Project
       run: |
-        rm -rf *.xcodeproj project.yml
+        rm -rf *.xcodeproj project.yml ThangLoApp
+        mkdir -p ThangLoApp
         
+        cat << 'EOF' > ThangLoApp/ContentView.swift
+        import SwiftUI
+
+        @main
+        struct ThangLoApp: App {
+            var body: some Scene {
+                WindowGroup {
+                    VStack(spacing: 20) {
+                        Text("THẮNG LO SCRIPT HUB")
+                            .font(.largeTitle)
+                            .bold()
+                            .foregroundColor(.cyan)
+                        
+                        Text("Script Pastefy:")
+                            .font(.headline)
+                        
+                        Text("loadstring(game:HttpGet(\"https://pastefy.app/y0dfgg3q/raw\"))()")
+                            .font(.system(size: 12, design: .monospaced))
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(8)
+                        
+                        Button(action: {
+                            UIPasteboard.general.string = "loadstring(game:HttpGet(\"https://pastefy.app/y0dfgg3q/raw\"))()"
+                        }) {
+                            Text("SAO CHÉP SCRIPT")
+                                .font(.title3)
+                                .bold()
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+                    }
+                    .padding()
+                }
+            }
+        }
+        EOF
+
         cat << 'EOF' > project.yml
         name: ThangLoApp
         options:
@@ -70,4 +113,3 @@ jobs:
       with:
         name: ThangLoApp-TrollStore
         path: build/ThangLoApp.ipa
-
