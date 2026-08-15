@@ -13,31 +13,52 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
+    - name: Install XcodeGen
+      run: brew install xcodegen
 
-    - name: Generate Project and Build IPA
+    - name: Create project.yml for XcodeGen
       run: |
-        # Tạo ứng dụng iOS bằng xcodebuild archive chuẩn
-        xcodebuild archive \
+        cat << 'EOF' > project.yml
+        name: ThangLoApp
+        options:
+          bundleIdPrefix: com.example
+          deploymentTarget:
+            iOS: "15.0"
+        targets:
+          ThangLoApp:
+            type: application
+            platform: iOS
+            sources:
+              - path: ThangLoApp
+            settings:
+              base:
+                GENERATE_INFOPLIST_FILE: YES
+                INFOPLIST_FILE: ThangLoApp/Info.plist
+                PRODUCT_BUNDLE_IDENTIFIER: com.example.ThangLoApp
+                CODE_SIGNING_ALLOWED: NO
+                CODE_SIGNING_REQUIRED: NO
+        EOF
+
+    - name: Generate Xcode Project
+      run: xcodegen generate
+
+    - name: Build App & Package IPA
+      run: |
+        xcodebuild build \
           -project ThangLoApp.xcodeproj \
           -scheme ThangLoApp \
-          -archivePath build/ThangLoApp.xcarchive \
           -sdk iphoneos \
           -configuration Release \
-          CODE_SIGNING_ALLOWED=NO \
-          CODE_SIGNING_REQUIRED=NO \
           CODE_SIGN_IDENTITY="" \
-          AD_HOC_CODE_SIGNING_ALLOWED=YES
-
-        # Đóng gói file .IPA từ archive
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          CONFIGURATION_BUILD_DIR=build
+        
         cd build
-        mkdir -p Payload
-        cp -r ThangLoApp.xcarchive/Products/Applications/*.app Payload/
+        mkdir Payload
+        cp -r ThangLoApp.app Payload/
         zip -r ThangLoApp.ipa Payload
-
+        
     - name: Upload IPA Artifact
       uses: actions/upload-artifact@v4
       with:
