@@ -1,0 +1,167 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		111111112222222200000001 /* ThangLoAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111112222222200000002 /* ThangLoAppApp.swift */; };
+		111111112222222200000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111112222222200000004 /* ContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		111111112222222200000000 /* ThangLoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ThangLoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		111111112222222200000002 /* ThangLoAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThangLoAppApp.swift; sourceTree = "<group>"; };
+		111111112222222200000004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		111111112222222200000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		111111112222222200000006 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		111111112222222200000007 = {
+			isa = PBXGroup;
+			children = (
+				111111112222222200000008 /* ThangLoApp */,
+				111111112222222200000000 /* ThangLoApp.app */,
+			);
+			sourceTree = "<group>";
+		};
+		111111112222222200000008 /* ThangLoApp */ = {
+			isa = PBXGroup;
+			children = (
+				111111112222222200000002 /* ThangLoAppApp.swift */,
+				111111112222222200000004 /* ContentView.swift */,
+				111111112222222200000005 /* Info.plist */,
+			);
+			path = ThangLoApp;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		111111112222222200000009 /* ThangLoApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11111111222222220000000C /* Build configuration list for PBXNativeTarget "ThangLoApp" */;
+			buildPhases = (
+				11111111222222220000000A /* Sources */,
+				111111112222222200000006 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ThangLoApp;
+			productName = ThangLoApp;
+			productReference = 111111112222222200000000 /* ThangLoApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		11111111222222220000000B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1400;
+				LastUpgradeCheck = 1400;
+			};
+			buildConfigurationList = 11111111222222220000000E /* Build configuration list for PBXProject "ThangLoApp" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 111111112222222200000007;
+			productRefGroup = 111111112222222200000007;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				111111112222222200000009 /* ThangLoApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		11111111222222220000000A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				111111112222222200000001 /* ThangLoAppApp.swift in Sources */,
+				111111112222222200000003 /* ContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		11111111222222220000000F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ThangLoApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.thanglo.scriptapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		111111112222222200000010 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ThangLoApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.thanglo.scriptapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		11111111222222220000000C /* Build configuration list for PBXNativeTarget "ThangLoApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11111111222222220000000F /* Debug */,
+				111111112222222200000010 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		11111111222222220000000E /* Build configuration list for PBXProject "ThangLoApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11111111222222220000000F /* Debug */,
+				111111112222222200000010 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 11111111222222220000000B /* Project object */;
+}
