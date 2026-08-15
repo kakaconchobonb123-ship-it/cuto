@@ -16,15 +16,13 @@ jobs:
     - name: Install XcodeGen
       run: brew install xcodegen
 
-    - name: Remove old project files
-      run: rm -rf ThangLoApp.xcodeproj
-
-    - name: Create project.yml for XcodeGen
+    - name: Clean and Create Project
       run: |
+        rm -rf ThangLoApp.xcodeproj project.yml
         cat << 'EOF' > project.yml
         name: ThangLoApp
         options:
-          bundleIdPrefix: com.example
+          bundleIdPrefix: com.thanglo
           deploymentTarget:
             iOS: "15.0"
         targets:
@@ -32,37 +30,28 @@ jobs:
             type: application
             platform: iOS
             sources:
-              - path: ThangLoApp
+              - ThangLoApp
             settings:
               base:
+                PRODUCT_BUNDLE_IDENTIFIER: com.thanglo.ThangLoApp
                 GENERATE_INFOPLIST_FILE: YES
-                INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
-                INFOPLIST_KEY_UILaunchScreen_Generation: YES
-                PRODUCT_BUNDLE_IDENTIFIER: com.example.ThangLoApp
-                CODE_SIGNING_ALLOWED: NO
-                CODE_SIGNING_REQUIRED: NO
         EOF
+        xcodegen generate
 
-    - name: Generate Xcode Project
-      run: xcodegen generate
-
-    - name: Build App & Package IPA
+    - name: Build and Package IPA
       run: |
         xcodebuild build \
           -project ThangLoApp.xcodeproj \
           -scheme ThangLoApp \
-          -sdk iphoneos \
+          -sdk iphonesimulator \
           -configuration Release \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
           CONFIGURATION_BUILD_DIR=build
         
         cd build
         mkdir Payload
         cp -r ThangLoApp.app Payload/
         zip -r ThangLoApp.ipa Payload
-        
+
     - name: Upload IPA Artifact
       uses: actions/upload-artifact@v4
       with:
