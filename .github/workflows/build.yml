@@ -1,3 +1,4 @@
+
 name: Build IPA for TrollStore
 
 on:
@@ -16,7 +17,7 @@ jobs:
     - name: Install XcodeGen
       run: brew install xcodegen
 
-    - name: Clean & Generate Project
+    - name: Clean & Generate Xcode Project
       run: |
         rm -rf *.xcodeproj project.yml
         cat << 'EOF' > project.yml
@@ -35,15 +36,18 @@ jobs:
               base:
                 PRODUCT_BUNDLE_IDENTIFIER: com.thanglo.ThangLoApp
                 GENERATE_INFOPLIST_FILE: YES
+                INFOPLIST_KEY_UILaunchScreen_Generation: YES
+                CODE_SIGNING_ALLOWED: NO
+                CODE_SIGNING_REQUIRED: NO
         EOF
         xcodegen generate
 
-    - name: Build App Execution File
+    - name: Build App for Simulator/TrollStore
       run: |
         xcodebuild build \
           -project ThangLoApp.xcodeproj \
           -scheme ThangLoApp \
-          -sdk iphoneos \
+          -sdk iphonesimulator \
           -configuration Release \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
@@ -62,4 +66,3 @@ jobs:
       with:
         name: ThangLoApp-TrollStore
         path: build/ThangLoApp.ipa
-
