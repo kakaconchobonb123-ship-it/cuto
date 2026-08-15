@@ -47,7 +47,7 @@ struct KeySystemView: View {
                     .font(.system(size: 36, weight: .black))
                     .foregroundColor(.cyan)
                 
-                Text("KEY")
+                Text("KEY SYSTEM")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.bottom, 10)
@@ -57,7 +57,7 @@ struct KeySystemView: View {
                         .font(.caption)
                         .foregroundColor(.gray)
                     
-                    TextField("Dán Key lấy từ Web vào đây...", text: $inputKey)
+                    TextField("Dán Key vào đây...", text: $inputKey)
                         .padding()
                         .background(Color(white: 0.15))
                         .cornerRadius(10)
@@ -70,13 +70,13 @@ struct KeySystemView: View {
                 Button(action: {
                     if let url = URL(string: getKeyURL) {
                         UIApplication.shared.open(url)
-                        statusMessage = "Đã mở Web giải đố. Hãy giải đố để lấy Key!"
+                        statusMessage = "Đã mở Web. Hãy lấy Key để tiếp tục!"
                         statusColor = .yellow
                     }
                 }) {
                     HStack {
                         Image(systemName: "safari")
-                        Text("LẤY KEY (GIẢI ĐỐ WEBS)")
+                        Text("LẤY KEY TẠI WEB")
                     }
                     .font(.system(size: 14, weight: .bold))
                     .frame(maxWidth: .infinity)
@@ -126,7 +126,7 @@ struct KeySystemView: View {
                 }
             }
         } else {
-            statusMessage = "Key chưa đúng hoặc chưa giải xong đố!"
+            statusMessage = "Key chưa chính xác, vui lòng kiểm tra lại!"
             statusColor = .red
         }
     }
@@ -139,19 +139,15 @@ struct MainScriptMenuView: View {
     @State private var timeRemainingString: String = ""
     @State private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
-    let scriptList = [
-        ("Blox Fruits", "loadstring(game:HttpGet('https://raw.githubusercontent.com/scriptpastebin/raw/main/bloxfruits'))()"),
-        ("King Legacy", "loadstring(game:HttpGet('https://raw.githubusercontent.com/scriptpastebin/raw/main/kinglegacy'))()"),
-        ("Blade Ball", "loadstring(game:HttpGet('https://raw.githubusercontent.com/scriptpastebin/raw/main/bladeball'))()"),
-        ("Brookhaven RP", "loadstring(game:HttpGet('https://raw.githubusercontent.com/scriptpastebin/raw/main/brookhaven'))()")
-    ]
+    // Script Pastefy của bạn
+    let pastefyScript = "loadstring(game:HttpGet(\"https://pastefy.app/y0dfgg3q/raw\"))()"
     
     var body: some View {
         NavigationView {
             ZStack {
                 Color(red: 0.08, green: 0.08, blue: 0.11).edgesIgnoringSafeArea(.all)
                 
-                VStack {
+                VStack(spacing: 20) {
                     HStack {
                         Image(systemName: "timer")
                         Text("Thời gian Key còn lại: \(timeRemainingString)")
@@ -163,16 +159,17 @@ struct MainScriptMenuView: View {
                     .background(Color.yellow.opacity(0.15))
                     
                     ScrollView {
-                        VStack(spacing: 12) {
-                            ForEach(scriptList, id: \.0) { item in
-                                ScriptItemRow(gameTitle: item.0, scriptCode: item.1)
-                            }
+                        VStack(spacing: 16) {
+                            ScriptItemRow(
+                                gameTitle: "THẮNG LO SCRIPT HUB", 
+                                scriptCode: pastefyScript
+                            )
                         }
                         .padding()
                     }
                 }
             }
-            .navigationTitle("THẮNG LO SCRIPT HUB")
+            .navigationTitle("HUD MENU SCRIPT")
             .navigationBarTitleDisplayMode(.inline)
         }
         .onReceive(timer) { _ in
@@ -203,40 +200,44 @@ struct ScriptItemRow: View {
     @State private var isCopied = false
     
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(gameTitle)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                Text("Nhấn/Giữ mạnh để Sao Chép")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-            }
-            Spacer()
+        VStack(alignment: .leading, spacing: 12) {
+            Text(gameTitle)
+                .font(.headline)
+                .foregroundColor(.cyan)
+            
+            Text(scriptCode)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(.gray)
+                .padding(8)
+                .background(Color.black.opacity(0.4))
+                .cornerRadius(6)
+            
             Button(action: { showConfirmDialog = true }) {
-                Text(isCopied ? "ĐÃ CHÉP!" : "LẤY SCRIPT")
-                    .font(.system(size: 12, weight: .bold))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(isCopied ? Color.gray : Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                HStack {
+                    Image(systemName: isCopied ? "checkmark.circle.fill" : "doc.on.doc")
+                    Text(isCopied ? "ĐÃ SAO CHÉP!" : "SAO CHÉP SCRIPT")
+                }
+                .font(.system(size: 14, weight: .bold))
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(isCopied ? Color.gray : Color.green)
+                .foregroundColor(.white)
+                .cornerRadius(8)
             }
         }
         .padding()
         .background(Color(white: 0.14))
-        .cornerRadius(10)
-        .onLongPressGesture { showConfirmDialog = true }
+        .cornerRadius(12)
         .alert(isPresented: $showConfirmDialog) {
             Alert(
                 title: Text("Xác nhận Sao Chép"),
-                message: Text("Bạn có muốn sao chép Script cho game \(gameTitle)?"),
+                message: Text("Sao chép mã Script để dán vào Roblox?"),
                 primaryButton: .default(Text("SAO CHÉP"), action: {
                     UIPasteboard.general.string = scriptCode
                     isCopied = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) { isCopied = false }
                 }),
-                secondaryButton: .cancel(Text("ĐỒNG"))
+                secondaryButton: .cancel(Text("HỦY"))
             )
         }
     }
