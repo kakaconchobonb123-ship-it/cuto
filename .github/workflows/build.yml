@@ -13,47 +13,61 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Prepare Source Code
+    - name: Setup Fresh Swift Project
       run: |
-        mkdir -p src_temp
+        # Xóa sạch các thư mục cũ tránh xung đột
+        rm -rf Sources ThangLoApp project.yml Package.swift
         
-        # Gom các file swift hiện có
-        find . -maxdepth 3 -name "*.swift" -exec cp {} src_temp/ \; || true
-        
-        # Nếu chưa có code, tự tạo file SwiftUI chuẩn đéc
-        if [ ! -f src_temp/App.swift ]; then
-          cat << 'EOF' > src_temp/App.swift
-          import SwiftUI
+        # Tạo cấu trúc code SwiftUI mới tinh
+        mkdir -p Sources/ThangLoApp
+        cat << 'EOF' > Sources/ThangLoApp/main.swift
+        import SwiftUI
 
-          @main
-          struct ThangLoApp: App {
-              var body: some Scene {
-                  WindowGroup {
-                      Text("Hello TrollStore!")
-                          .font(.largeTitle)
-                  }
-              }
-          }
-          EOF
-        fi
+        @main
+        struct ThangLoApp: App {
+            var body: some Scene {
+                WindowGroup {
+                    Text("Hello TrollStore!")
+                        .font(.largeTitle)
+                        .padding()
+                }
+            }
+        }
+        EOF
 
-    - name: Compile & Package IPA
+        # Tạo file cấu hình SPM Package.swift
+        cat << 'EOF' > Package.swift
+        // swift-tools-version:5.5
+        import PackageDescription
+
+        let package = Package(
+            name: "ThangLoApp",
+            platforms: [.iOS(.v15)],
+            products: [
+                .executable(name: "ThangLoApp", targets: ["ThangLoApp"])
+            ],
+            targets: [
+                .executableTarget(
+                    name: "ThangLoApp",
+                    path: "Sources/ThangLoApp"
+                )
+            ]
+        )
+        EOF
+
+    - name: Build Executable
       run: |
         SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+        swift build -c release --sdk $SDK_PATH -Xswiftc -target -Xswiftc arm64-apple-ios15.0
+
+    - name: Package IPA
+      run: |
         mkdir -p build/Payload/ThangLoApp.app
         
-        # Biên dịch Swift ra file thực thi cho iOS ARM64
-        swiftc -sdk $SDK_PATH \
-               -target arm64-apple-ios15.0 \
-               -parse-as-library \
-               -framework SwiftUI \
-               -framework UIKit \
-               -framework Foundation \
-               -emit-executable \
-               -o build/Payload/ThangLoApp.app/ThangLoApp \
-               src_temp/*.swift
-
-        # Tạo Info.plist
+        # Coppy file thực thi sau khi build xong
+        cp .build/arm64-apple-ios/release/ThangLoApp build/Payload/ThangLoApp.app/
+        
+        # Tạo Info.plist chuẩn
         cat << 'EOF' > build/Payload/ThangLoApp.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
