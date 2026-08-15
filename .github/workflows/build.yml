@@ -21,6 +21,7 @@ jobs:
         
         swiftc -sdk $SDK_PATH \
                -target arm64-apple-ios15.0 \
+               -parse-as-library \
                -emit-executable \
                -o build/ThangLoApp.app/ThangLoApp \
                ThangLoApp/ThangLoAppApp.swift \
