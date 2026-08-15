@@ -17,26 +17,10 @@ jobs:
     - name: Install XcodeGen
       run: brew install xcodegen
 
-    - name: Clean & Setup Simple Project
+    - name: Setup Project Structure
       run: |
-        rm -rf *.xcodeproj project.yml Sources ThangLoApp
-        mkdir -p ThangLoApp
+        rm -rf *.xcodeproj project.yml
         
-        cat << 'EOF' > ThangLoApp/ContentView.swift
-        import SwiftUI
-
-        @main
-        struct ThangLoApp: App {
-            var body: some Scene {
-                WindowGroup {
-                    Text("App Da Build Thanh Cong!")
-                        .font(.title)
-                        .padding()
-                }
-            }
-        }
-        EOF
-
         cat << 'EOF' > project.yml
         name: ThangLoApp
         options:
