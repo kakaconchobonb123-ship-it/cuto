@@ -13,27 +13,31 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Build App & Package IPA
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+
+    - name: Generate Project and Build IPA
       run: |
-        SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-        
-        mkdir -p build/ThangLoApp.app
-        
-        swiftc -sdk $SDK_PATH \
-               -target arm64-apple-ios15.0 \
-               -parse-as-library \
-               -emit-executable \
-               -o build/ThangLoApp.app/ThangLoApp \
-               ThangLoApp/ThangLoAppApp.swift \
-               ThangLoApp/ContentView.swift
-        
-        cp ThangLoApp/Info.plist build/ThangLoApp.app/
-        
+        # Tạo ứng dụng iOS bằng xcodebuild archive chuẩn
+        xcodebuild archive \
+          -project ThangLoApp.xcodeproj \
+          -scheme ThangLoApp \
+          -archivePath build/ThangLoApp.xcarchive \
+          -sdk iphoneos \
+          -configuration Release \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGN_IDENTITY="" \
+          AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+        # Đóng gói file .IPA từ archive
         cd build
-        mkdir Payload
-        cp -r ThangLoApp.app Payload/
+        mkdir -p Payload
+        cp -r ThangLoApp.xcarchive/Products/Applications/*.app Payload/
         zip -r ThangLoApp.ipa Payload
-        
+
     - name: Upload IPA Artifact
       uses: actions/upload-artifact@v4
       with:
