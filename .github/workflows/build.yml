@@ -13,23 +13,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Compile Swift Code Directly
+    - name: Compile Swift Code & Package IPA
       run: |
         SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
         
-        # Tạo cấu trúc file .app
+        # 1. Tạo thư mục cấu trúc cho app iOS
         mkdir -p build/Payload/ThangLoApp.app
         
-        # Biên dịch các file Swift trực tiếp ra file chạy ARM64 cho iOS
+        # 2. Tìm tất cả file .swift trong dự án để biên dịch
+        SWIFT_FILES=$(find . -name "*.swift" ! -path "*/.*")
+        
+        # 3. Biên dịch trực tiếp ra file thực thi
         swiftc -sdk $SDK_PATH \
                -target arm64-apple-ios15.0 \
                -parse-as-library \
+               -framework SwiftUI \
+               -framework UIKit \
+               -framework Foundation \
                -emit-executable \
                -o build/Payload/ThangLoApp.app/ThangLoApp \
-               ThangLoApp/ThangLoAppApp.swift \
-               ThangLoApp/ContentView.swift
+               $SWIFT_FILES
                
-        # Tạo file Info.plist chuẩn cho iOS app
+        # 4. Tạo file cấu hình Info.plist
         cat << 'EOF' > build/Payload/ThangLoApp.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -56,12 +61,8 @@ jobs:
         </plist>
         EOF
 
-    - name: Ad-Hoc Sign & Zip IPA
-      run: |
-        # Ký giả Ad-Hoc bằng ldprivcode / codesign của macOS
+        # 5. Ký giả Ad-Hoc & đóng gói thành IPA
         codesign --force --deep --sign - build/Payload/ThangLoApp.app
-        
-        # Nén thành file .IPA
         cd build
         zip -r ThangLoApp.ipa Payload
 
