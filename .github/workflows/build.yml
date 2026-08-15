@@ -1,4 +1,4 @@
-name: Build IPA for TrollStore
+name: Force Build IPA Universal
 
 on:
   push:
@@ -13,56 +13,60 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install XcodeGen
-      run: brew install xcodegen
-
-    - name: Clean Old Files & Create Project
+    - name: Compile Swift Code Directly
       run: |
-        rm -rf *.xcodeproj project.yml
-        cat << 'EOF' > project.yml
-        name: ThangLoApp
-        options:
-          bundleIdPrefix: com.thanglo
-          deploymentTarget:
-            iOS: "15.0"
-        targets:
-          ThangLoApp:
-            type: application
-            platform: iOS
-            sources:
-              - ThangLoApp
-            settings:
-              base:
-                PRODUCT_BUNDLE_IDENTIFIER: com.thanglo.ThangLoApp
-                GENERATE_INFOPLIST_FILE: YES
-                INFOPLIST_KEY_UILaunchScreen_Generation: YES
-                CODE_SIGNING_ALLOWED: NO
-                CODE_SIGNING_REQUIRED: NO
+        SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+        
+        # Tạo cấu trúc file .app
+        mkdir -p build/Payload/ThangLoApp.app
+        
+        # Biên dịch các file Swift trực tiếp ra file chạy ARM64 cho iOS
+        swiftc -sdk $SDK_PATH \
+               -target arm64-apple-ios15.0 \
+               -parse-as-library \
+               -emit-executable \
+               -o build/Payload/ThangLoApp.app/ThangLoApp \
+               ThangLoApp/ThangLoAppApp.swift \
+               ThangLoApp/ContentView.swift
+               
+        # Tạo file Info.plist chuẩn cho iOS app
+        cat << 'EOF' > build/Payload/ThangLoApp.app/Info.plist
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>CFBundleExecutable</key>
+            <string>ThangLoApp</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.thanglo.ThangLoApp</string>
+            <key>CFBundleName</key>
+            <string>ThangLoApp</string>
+            <key>CFBundleShortVersionString</key>
+            <string>1.0</string>
+            <key>CFBundleVersion</key>
+            <string>1</string>
+            <key>MinimumOSVersion</key>
+            <string>15.0</string>
+            <key>UIApplicationSceneManifest</key>
+            <dict>
+                <key>UIApplicationSupportsMultipleScenes</key>
+                <true/>
+            </dict>
+        </dict>
+        </plist>
         EOF
-        xcodegen generate
 
-    - name: Build App Executable
+    - name: Ad-Hoc Sign & Zip IPA
       run: |
-        xcodebuild build \
-          -project ThangLoApp.xcodeproj \
-          -scheme ThangLoApp \
-          -sdk iphonesimulator \
-          -configuration Release \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          CONFIGURATION_BUILD_DIR=build
-
-    - name: Package IPA for TrollStore
-      run: |
+        # Ký giả Ad-Hoc bằng ldprivcode / codesign của macOS
+        codesign --force --deep --sign - build/Payload/ThangLoApp.app
+        
+        # Nén thành file .IPA
         cd build
-        mkdir Payload
-        cp -r ThangLoApp.app Payload/
         zip -r ThangLoApp.ipa Payload
 
-    - name: Upload IPA Artifact
+    - name: Upload Universal IPA Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ThangLoApp-TrollStore
+        name: ThangLoApp-Universal-IPA
         path: build/ThangLoApp.ipa
-
