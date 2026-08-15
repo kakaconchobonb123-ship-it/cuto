@@ -1,4 +1,3 @@
-
 name: Build IPA for TrollStore
 
 on:
@@ -14,40 +13,31 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Create Package.swift
-      run: |
-        cat << 'EOF' > Package.swift
-        // swift-tools-version:5.5
-        import PackageDescription
-
-        let package = Package(
-            name: "ThangLoApp",
-            platforms: [.iOS(.v15)],
-            products: [
-                .executable(name: "ThangLoApp", targets: ["ThangLoApp"])
-            ],
-            targets: [
-                .executableTarget(
-                    name: "ThangLoApp",
-                    path: "ThangLoApp"
-                )
-            ]
-        )
-        EOF
-
-    - name: Build Executable via SPM
+    - name: Prepare Sources and Compile
       run: |
         SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-        swift build -c release --sdk $SDK_PATH -Xswiftc -target -Xswiftc arm64-apple-ios15.0
-
-    - name: Package IPA Structure
-      run: |
+        
+        # 1. Tạo thư mục tạm và gom tất cả file .swift vào 1 chỗ
+        mkdir -p src_temp
+        find . -maxdepth 3 -name "*.swift" -exec cp {} src_temp/ \;
+        
+        # 2. Tạo cấu trúc thư mục .app
         mkdir -p build/Payload/ThangLoApp.app
         
-        # Sao chép file chạy được biên dịch từ SPM vào .app
-        cp .build/arm64-apple-ios/release/ThangLoApp build/Payload/ThangLoApp.app/
-        
-        # Tạo Info.plist
+        # 3. Biên dịch trực tiếp toàn bộ các file swift trong src_temp
+        swiftc -sdk $SDK_PATH \
+               -target arm64-apple-ios15.0 \
+               -parse-as-library \
+               -framework SwiftUI \
+               -framework UIKit \
+               -framework Foundation \
+               -emit-executable \
+               -o build/Payload/ThangLoApp.app/ThangLoApp \
+               src_temp/*.swift
+
+    - name: Create Info.plist & Package IPA
+      run: |
+        # Tạo Info.plist chuẩn iOS
         cat << 'EOF' > build/Payload/ThangLoApp.app/Info.plist
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -74,14 +64,14 @@ jobs:
         </plist>
         EOF
 
-    - name: Sign & Zip IPA
-      run: |
+        # Ký Ad-Hoc và nén IPA
         codesign --force --deep --sign - build/Payload/ThangLoApp.app
         cd build
         zip -r ThangLoApp.ipa Payload
 
-    - name: Upload IPA Artifact
+    - name: Upload Universal IPA
       uses: actions/upload-artifact@v4
       with:
         name: ThangLoApp-TrollStore
         path: build/ThangLoApp.ipa
+
