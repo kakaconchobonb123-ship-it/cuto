@@ -1,4 +1,3 @@
-
 name: Build IPA for TrollStore
 
 on:
@@ -71,3 +70,4 @@ jobs:
       with:
         name: ThangLoApp-TrollStore
         path: build/ThangLoApp.ipa
+
