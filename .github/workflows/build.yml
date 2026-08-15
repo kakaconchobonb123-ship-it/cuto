@@ -1,4 +1,3 @@
-
 name: Build IPA for TrollStore
 
 on:
@@ -17,7 +16,7 @@ jobs:
     - name: Install XcodeGen
       run: brew install xcodegen
 
-    - name: Clean & Generate Xcode Project
+    - name: Clean Old Files & Create Project
       run: |
         rm -rf *.xcodeproj project.yml
         cat << 'EOF' > project.yml
@@ -42,7 +41,7 @@ jobs:
         EOF
         xcodegen generate
 
-    - name: Build App for Simulator/TrollStore
+    - name: Build App Executable
       run: |
         xcodebuild build \
           -project ThangLoApp.xcodeproj \
@@ -66,3 +65,4 @@ jobs:
       with:
         name: ThangLoApp-TrollStore
         path: build/ThangLoApp.ipa
+
