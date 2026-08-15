@@ -13,22 +13,20 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
-
-    - name: Build App with Xcode
+    - name: Build App & Package IPA
       run: |
-        xcodebuild build \
-          -project ThangLoApp.xcodeproj \
-          -alltargets \
-          -sdk iphoneos \
-          -configuration Release \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          CONFIGURATION_BUILD_DIR=build
+        SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+        
+        mkdir -p build/ThangLoApp.app
+        
+        swiftc -sdk $SDK_PATH \
+               -target arm64-apple-ios15.0 \
+               -emit-executable \
+               -o build/ThangLoApp.app/ThangLoApp \
+               ThangLoApp/ThangLoAppApp.swift \
+               ThangLoApp/ContentView.swift
+        
+        cp ThangLoApp/Info.plist build/ThangLoApp.app/
         
         cd build
         mkdir Payload
